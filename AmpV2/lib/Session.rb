@@ -61,7 +61,7 @@ class Session
 		 }
 	end 
 
-	def observe(name:, props:, options:, cb:)
+	def observe(name:, props:, options:)
 	    ts = DateTime.now
 	    #self.startFreshIfExpired();
 	    @updated = ts
@@ -90,7 +90,7 @@ class Session
 
     end
 
-    def decide(name:, candidates:, options:, cb:) 
+    def decide(name:, candidates:, options:) 
     	ts = DateTime.now
 	    @updated = ts
 	    options['timeout'] = options['timeout'] || @timeout
@@ -120,7 +120,7 @@ class Session
 		end 
     end
 
-    def decideWithContext(context: , properties:, decision:, candidates:, options:, cb:) 
+    def decideWithContext(context: , properties:, decision:, candidates:, options:) 
     	ts = DateTime.now
 	    @updated = ts
 	    options['timeout'] = options['timeout'] || @timeout
@@ -133,7 +133,7 @@ class Session
 		"userId":@userId,
 		"sessionId":@id, 
 		"name": context,
-		"properties": props,
+		"properties": properties,
 		"decisionName": decision, 
 		"decision":
 			{"candidates": [candidates] }
