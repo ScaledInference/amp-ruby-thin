@@ -17,7 +17,7 @@ optparse = OptionParser.new do|opts|
 
   options[:domain] = ""
   opts.on( '-d', '--domains DOMAIN', "Amp agent domain" ) do|d|
-      options[:domain] = d
+      options[:domain] = d.split(%r{,\s*})
   end
   opts.parse!
 end
@@ -29,7 +29,7 @@ amp = Amp.new({'key' => options[:key], 'domain' => options[:domain]})
 #100.times do
    # do work here
     session1 = amp.Session()
-    oldAmpToken = session1.observe(name:'UserType', props: {
+    oldAmpToken = session1.observe(event:'UserType', props: {
     		"key1":"value1",
     		"key2":2, 
     		"key3":3.0, 
@@ -42,7 +42,7 @@ amp = Amp.new({'key' => options[:key], 'domain' => options[:domain]})
     print "\n\n"
 
     print session2.decide(
-        name:'DecisionPoint1', 
+        decision:'DecisionPoint1', 
         candidates: {   
             color: ['red', 'green'],
             number: [3,2,1]
@@ -58,11 +58,11 @@ amp = Amp.new({'key' => options[:key], 'domain' => options[:domain]})
         decision:'DecisionPoint2', 
         candidates: {   
             color: ['red', 'green', 'yellow'],
-            number: [3,2,1]
+            number1: [3,2,1]
         }, 
         options: {limit: 2, timeout: 0})
     print "\n\n"
 
-    print session2.observe(name:'Outcome', props: {
+    print session2.observe(event:'Outcome', props: {
             "Metric":"1"}, options: {})
 #end 

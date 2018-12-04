@@ -5,6 +5,7 @@ require 'json'
 require 'securerandom'
 
 class Session 
+	MAX_CANDIDATES = 50
 
 	def initialize(domain, apiPath, project_key, options = {})
 		@amp = options['amp'];
@@ -25,7 +26,8 @@ class Session
 	end
 
 	def getEndpoint(name:)
-    	uri = URI(@domain + @apiPath + @project_key + name)
+		chosen_domain = @domain[0]
+        uri = URI(chosen_domain + @apiPath + @project_key + name)
     	uri
     end
 
@@ -61,7 +63,7 @@ class Session
 		 }
 	end 
 
-	def observe(name:, props:, options:)
+	def observe(event:, props:, options:)
 	    ts = DateTime.now
 	    #self.startFreshIfExpired();
 	    @updated = ts
@@ -71,9 +73,9 @@ class Session
 	    # Call the url
 	    req = Net::HTTP::Post.new(uri.path, initheader = {'Content-Type' =>'application/json'})
 		req.body = {
-			"userId":@userId, 
-			"sessionId":@id, 
-			"name": "#{name}",
+			"userId":@userId,
+			"sessionId":@id,
+			"name": event,
 			"ampToken": @ampToken,
 			"properties": props, 
 		}.to_json
@@ -90,7 +92,17 @@ class Session
 
     end
 
-    def decide(name:, candidates:, options:) 
+    def checkCandidates(candidates:)
+        num_candidates = 1
+        candidates.each do |key, value|
+            num_candidates *= value.length
+        end
+        if num_candidates > MAX_CANDIDATES
+            raise "Too many candidates"
+        end
+    end
+
+    def decide(decision:, candidates:, options:)
     	ts = DateTime.now
 	    @updated = ts
 	    options['timeout'] = options['timeout'] || @timeout
@@ -98,11 +110,17 @@ class Session
 
 	    uri = getEndpoint(name: '/decideV2')
 
+	    if decision == nil || decision == ''
+	        raise "Decision name cannot be empty"
+	    end
+
+	    checkCandidates(candidates: candidates)
+
 	    req = Net::HTTP::Post.new(uri.path, initheader = {'Content-Type' =>'application/json'})
         req.body = {
-		"userId":@userId, 
-		"sessionId":@id, 
-		"name": "#{name}", 
+		"userId": @userId, 
+		"sessionId": @id, 
+		"name": decision, 
 		"decision":
 			{"candidates": [candidates] }
 		}.to_json
@@ -125,6 +143,12 @@ class Session
 	    @updated = ts
 	    options['timeout'] = options['timeout'] || @timeout
 	    options['limit'] = options['limit'] || 1;
+
+	    if decision == nil || decision == ''
+	        raise "Decision name cannot be empty"
+	    end
+
+	    checkCandidates(candidates: candidates)
 
 	    uri = getEndpoint(name: '/decideWithContextV2')
 
