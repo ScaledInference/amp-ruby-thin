@@ -25,8 +25,16 @@ class Session
 	    @ampToken = options['ampToken']
 	end
 
+	def getAmpAgent()
+		x = @userid.hash % @domain.length
+		if (x < 0) 
+			x += @domain.length
+		end
+		@domain[x] 
+	end
+
 	def getEndpoint(name:)
-		chosen_domain = @domain[0]
+		chosen_domain = getAmpAgent()
         uri = URI(chosen_domain + @apiPath + @project_key + name)
     	uri
     end
