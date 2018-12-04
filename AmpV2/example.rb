@@ -1,6 +1,29 @@
+require 'optparse'
+require 'pp'
 require 'Amp'
 
-amp = Amp.new({'key' => 'da269c0cda33b03f', 'domain' => 'http://localhost:8100'})
+options = {}
+
+optparse = OptionParser.new do|opts|
+  opts.on( '-h', '--help', 'Display this screen' ) do
+    puts opts
+    exit
+  end
+
+  options[:key] = ""
+  opts.on( '-k', '--key KEY', "Project Key" ) do|k|
+      options[:key] = k
+  end
+
+  options[:domain] = ""
+  opts.on( '-d', '--domains DOMAIN', "Amp agent domain" ) do|d|
+      options[:domain] = d
+  end
+  opts.parse!
+end
+
+#amp = Amp.new({'key' => 'da269c0cda33b03f', 'domain' => 'http://localhost:8100'})
+amp = Amp.new({'key' => options[:key], 'domain' => options[:domain]})
 
 
 #100.times do
